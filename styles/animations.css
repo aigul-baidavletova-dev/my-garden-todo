@@ -1,0 +1,113 @@
+/* Анимации интерфейса (деревья анимирует three.js).
+   Стараюсь крутить только transform/opacity/filter - они не вызывают перерасчёт layout. */
+
+/* появление карточки, запасной вариант для браузеров без View Transitions */
+
+@keyframes task-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+
+.task--enter {
+  animation: task-in var(--duration-base) var(--ease-out);
+}
+
+/* задачу отметили - вокруг карточки расходится зелёная волна */
+
+@keyframes bloom {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-done) 60%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0.75rem transparent;
+  }
+}
+
+.task--bloom {
+  animation: bloom 700ms var(--ease-out);
+}
+
+/* view transitions: карточки переезжают, удалённая как будто опадает */
+
+@keyframes fall-away {
+  to {
+    opacity: 0;
+    transform: translateY(0.75rem) rotate(-2deg) scale(0.96);
+    filter: saturate(0) sepia(0.6);
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: var(--duration-base);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(.task):only-child {
+  animation: fall-away var(--duration-slow) var(--ease-out) both;
+}
+
+::view-transition-new(.task):only-child {
+  animation: task-in var(--duration-base) var(--ease-out) both;
+}
+
+/* трясём форму, если пытаются добавить пустую задачу */
+
+@keyframes shake {
+  20%, 60% {
+    transform: translateX(-6px);
+  }
+  40%, 80% {
+    transform: translateX(6px);
+  }
+}
+
+.add-form--shake {
+  animation: shake 300ms;
+}
+
+/* тост */
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 1rem);
+  }
+}
+
+.toast:not([hidden]) {
+  animation: toast-in var(--duration-base) var(--ease-out);
+}
+
+/* окно приветствия всплывает снизу */
+
+@keyframes welcome-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.96);
+  }
+}
+
+.welcome[open] {
+  animation: welcome-in var(--duration-slow) var(--ease-out);
+}
+
+/* если в системе выключена анимация - выключаем и здесь */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,87 @@
+/* Сброс, базовая типографика, общие штуки для доступности */
+
+/* reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+h1, h2, h3,
+p,
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+/* Safari без маркеров перестаёт считать это списком, поэтому в разметке role="list" */
+ul, ol {
+  list-style: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* сад на весь экран, скроллится только панель */
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+  background: var(--backdrop-morning);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root[data-daytime="evening"] body {
+  background: var(--backdrop-evening);
+}
+
+:root[data-daytime="night"] body {
+  background: var(--backdrop-night);
+}
+
+/* a11y */
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* не видно глазами, но скринридер прочитает */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+[hidden] {
+  display: none !important;
+}

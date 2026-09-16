@@ -1,0 +1,109 @@
+/* Переменные: цвета, размеры, тайминги. В других файлах только var(--...).
+   Цвета панели зависят от data-daytime на <html> (ставится ещё в <head>, чтобы не мигало).
+   Цвета самой 3D-сцены лежат в core/daytime.js. */
+
+/* утро, оно же по умолчанию */
+:root,
+:root[data-daytime="morning"] {
+  color-scheme: light;
+  --color-panel: rgb(250 249 241 / 0.9);
+  --color-surface: #ffffff;
+  --color-surface-2: #eceadd;
+  --color-sprout-card: #f7f6ee;
+  --color-text: #1f2a1c;
+  --color-text-muted: #525d4b;
+  --color-accent: #2f6b3a;
+  --color-on-accent: #f7fbf2;
+  --color-done: #2f6b3a;
+  --color-done-surface: #dfecd0;
+  --color-danger: #a8321f;
+  --color-border: rgb(31 42 28 / 0.16);
+  --color-focus: #b8560b;
+  --color-hint: rgb(31 42 28 / 0.75);
+  --panel-shadow: 0 12px 40px rgb(31 42 28 / 0.18);
+  --icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f7fbf2' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");
+}
+
+/* вечер */
+:root[data-daytime="evening"] {
+  color-scheme: dark;
+  --color-panel: rgb(42 29 46 / 0.88);
+  --color-surface: rgb(255 255 255 / 0.08);
+  --color-surface-2: rgb(255 255 255 / 0.12);
+  --color-sprout-card: rgb(255 255 255 / 0.05);
+  --color-text: #f8ece5;
+  --color-text-muted: #d9c1bb;
+  --color-accent: #ffb27a;
+  --color-on-accent: #2a1a24;
+  --color-done: #ffc49a;
+  --color-done-surface: rgb(255 178 122 / 0.16);
+  --color-danger: #ff9a8f;
+  --color-border: rgb(255 255 255 / 0.16);
+  --color-focus: #ffd27a;
+  --color-hint: rgb(255 240 230 / 0.85);
+  --panel-shadow: 0 12px 40px rgb(0 0 0 / 0.35);
+  --icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a1a24' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");
+}
+
+/* ночь */
+:root[data-daytime="night"] {
+  color-scheme: dark;
+  --color-panel: rgb(11 17 31 / 0.88);
+  --color-surface: rgb(255 255 255 / 0.07);
+  --color-surface-2: rgb(255 255 255 / 0.11);
+  --color-sprout-card: rgb(255 255 255 / 0.04);
+  --color-text: #e4ebf6;
+  --color-text-muted: #a9b8cf;
+  --color-accent: #8fd0a0;
+  --color-on-accent: #0b1a12;
+  --color-done: #9fe0ad;
+  --color-done-surface: rgb(143 208 160 / 0.14);
+  --color-danger: #ff9a8f;
+  --color-border: rgb(255 255 255 / 0.14);
+  --color-focus: #f2c14e;
+  --color-hint: rgb(228 235 246 / 0.8);
+  --panel-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+  --icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b1a12' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E");
+}
+
+/* общее */
+:root {
+  /* фон, пока грузится three.js (или если WebGL нет) */
+  --backdrop-morning: linear-gradient(#5fa8dc, #fde6c4 70%, #78ad55 70%);
+  --backdrop-evening: linear-gradient(#343377, #f39462 70%, #5a7a42 70%);
+  --backdrop-night: linear-gradient(#040812, #1a2b4c 70%, #26402b 70%);
+
+  /* шрифты */
+  --font-display: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: clamp(2rem, 1.6rem + 1.5vw, 2.75rem);
+
+  /* 4 8 12 16 24 32 48px */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* скругления */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.5rem;
+  --radius-full: 999px;
+  --hit: 2.75rem;                     /* 44px - меньше неудобно попадать пальцем */
+  --panel-width: 25rem;
+
+  /* анимации */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

@@ -1,0 +1,662 @@
+/* Компоненты. Классы по BEM (.task, .task__title, .task--done).
+   Состояния кнопок завязаны на aria-pressed / aria-expanded, а не на .active -
+   так вид и доступность не могут разойтись. */
+
+/* ---------- 3D-сад ---------- */
+
+.garden-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+
+.garden-canvas:active {
+  cursor: grabbing;
+}
+
+.garden-fallback {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  max-width: 20rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-panel);
+  font-size: var(--text-sm);
+}
+
+.plant-tooltip {
+  position: fixed;
+  z-index: 30;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-panel);
+  color: var(--color-text);
+  box-shadow: var(--panel-shadow);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 0.75rem));
+}
+
+.drag-hint {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-panel);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  pointer-events: none;
+}
+
+.no-webgl .drag-hint {
+  display: none;
+}
+
+/* ---------- переключатель времени суток ---------- */
+
+.daytime {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 20;
+  display: flex;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-panel);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.daytime__btn {
+  min-width: var(--hit);
+  min-height: var(--hit);
+  padding-inline: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1;
+  transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base);
+}
+
+.daytime__btn:hover {
+  color: var(--color-text);
+}
+
+.daytime__btn[aria-pressed="true"] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+/* ---------- панель ---------- */
+
+.panel {
+  position: fixed;
+  top: var(--space-4);
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--panel-width), calc(100vw - 2 * var(--space-4)));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-panel);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(16px) saturate(1.2);
+  transition: background-color var(--duration-slow), color var(--duration-slow);
+}
+
+.panel__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3) var(--space-5);
+}
+
+.panel__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel__clock {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;   /* иначе часы дёргаются при смене цифр */
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.panel__clock::after {
+  content: '';
+  display: inline-block;
+  width: 0.28em;
+  height: 0.44em;
+  margin-inline-start: 0.12em;
+  border-radius: 0 100% 0 100%;
+  background: var(--color-accent);
+  transform: rotate(-12deg) translateY(-0.6em);
+}
+
+.panel__date {
+  margin-block-start: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.panel__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--hit);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.panel__toggle:hover {
+  background: var(--color-surface-2);
+}
+
+.panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: 0 var(--space-4) var(--space-4);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* свёрнутая панель - остаётся одна шапка */
+.panel--collapsed {
+  bottom: auto;
+}
+
+.panel--collapsed .panel__body {
+  display: none;
+}
+
+.garden-summary {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-done-surface);
+  font-weight: 500;
+  font-variant-numeric: lining-nums;
+  text-align: center;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- форма ---------- */
+
+.add-form {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.add-form__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 3rem;
+  padding-inline: var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--text-lg);
+  transition: border-color var(--duration-fast);
+}
+
+.add-form__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.add-form__input:focus {
+  border-color: var(--color-accent);
+}
+
+.add-form__input:focus-visible {
+  outline-offset: 0;
+}
+
+.add-form__button {
+  flex-shrink: 0;
+  min-height: 3rem;
+  padding-inline: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: filter var(--duration-fast), transform var(--duration-fast) var(--ease-out);
+}
+
+.add-form__button:hover {
+  filter: brightness(1.08);
+}
+
+.add-form__button:active {
+  transform: scale(0.97);
+}
+
+/* ---------- фильтры ---------- */
+
+.filters {
+  display: flex;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+}
+
+.filters__btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.5rem;
+  padding-inline: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base);
+}
+
+.filters__btn:hover {
+  color: var(--color-text);
+}
+
+.filters__btn[aria-pressed="true"] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.filters__count {
+  min-width: 1.5rem;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.5rem;
+  text-align: center;
+}
+
+.filters__btn[aria-pressed="true"] .filters__count {
+  background: var(--color-on-accent);
+  color: var(--color-accent);
+}
+
+/* ---------- поиск и сортировка ---------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.toolbar__search,
+.toolbar__sort {
+  min-height: 2.5rem;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+}
+
+.toolbar__sort option {
+  background: #ffffff;
+  color: #1f2a1c;
+}
+
+.toolbar__search {
+  flex: 1 1 9rem;
+}
+
+.toolbar__sort {
+  flex: 0 1 auto;
+}
+
+/* ---------- карточка задачи ---------- */
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* пока не сделана - пунктирная рамка, как грядка */
+.task {
+  view-transition-class: task;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "toggle title remove"
+    ".      meta  remove";
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-2) var(--space-1) var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-sprout-card);
+  transition: background-color var(--duration-slow) var(--ease-out), border-color var(--duration-slow);
+}
+
+.task__toggle {
+  grid-area: toggle;
+  appearance: none;
+  display: grid;
+  place-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  margin: 0;
+  border: 2px solid var(--color-text-muted);
+  border-radius: 50% 50% 50% 0;       /* листик */
+  background: transparent center / 70% no-repeat;
+  cursor: pointer;
+  transition: background-color var(--duration-fast), border-color var(--duration-fast),
+    border-radius var(--duration-base);
+}
+
+.task__toggle:hover {
+  border-color: var(--color-done);
+}
+
+.task__toggle:checked {
+  border-color: var(--color-done);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-done);
+  background-image: var(--icon-check);
+}
+
+.task__title {
+  grid-area: title;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.task__meta {
+  grid-area: meta;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.task__remove {
+  grid-area: remove;
+  width: var(--hit);
+  height: var(--hit);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  opacity: 0.4;
+  transition: opacity var(--duration-fast), color var(--duration-fast), background-color var(--duration-fast);
+}
+
+/* focus-within - чтобы крестик был виден и при навигации с клавиатуры */
+.task:hover .task__remove,
+.task:focus-within .task__remove {
+  opacity: 1;
+}
+
+.task__remove:hover {
+  background: var(--color-surface-2);
+  color: var(--color-danger);
+}
+
+@media (hover: none) {
+  .task__remove {
+    opacity: 0.8;
+  }
+}
+
+/* сделанная */
+.task--done {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--color-done) 40%, transparent);
+  background: var(--color-done-surface);
+}
+
+.task--done .task__title {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--color-done) 70%, transparent);
+  text-decoration-thickness: 2px;
+}
+
+/* ---------- пустой список, футер ---------- */
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-4);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.empty__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.empty__text {
+  font-weight: 500;
+}
+
+.panel__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--hit);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font-size: var(--text-sm);
+}
+
+.button--ghost {
+  border-color: transparent;
+  color: var(--color-text-muted);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.button:disabled {
+  opacity: 0.45;
+}
+
+/* ---------- тост ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-5);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: calc(100vw - 2 * var(--space-4));
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-text);
+  color: var(--color-panel);
+  box-shadow: var(--panel-shadow);
+  font-size: var(--text-sm);
+  transform: translateX(-50%);
+}
+
+:root[data-daytime="morning"] .toast,
+:root:not([data-daytime]) .toast {
+  color: #fbfaf3;
+}
+
+:root[data-daytime="evening"] .toast {
+  color: #2a1d2e;
+}
+
+:root[data-daytime="night"] .toast {
+  color: #0b111f;
+}
+
+.toast__action {
+  min-height: 2.25rem;
+  padding-inline: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---------- окно приветствия ---------- */
+
+.welcome {
+  width: min(28rem, calc(100vw - 2 * var(--space-4)));
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-panel);
+  color: var(--color-text);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(16px) saturate(1.2);
+  text-align: center;
+}
+
+/* ::backdrop - затемнение за модалкой */
+.welcome::backdrop {
+  background: rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(3px);
+}
+
+.welcome__icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.welcome__title {
+  margin-block: var(--space-3);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.welcome__text {
+  margin-block-end: var(--space-5);
+  color: var(--color-text-muted);
+}
+
+.welcome__button {
+  width: 100%;
+  min-height: 3rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: filter var(--duration-fast), transform var(--duration-fast) var(--ease-out);
+}
+
+.welcome__button:hover {
+  filter: brightness(1.08);
+}
+
+.welcome__button:active {
+  transform: scale(0.97);
+}
+
+/* ---------- телефон: панель уезжает вниз ---------- */
+
+@media (max-width: 50rem) {
+  .panel {
+    top: auto;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    left: var(--space-2);
+    width: auto;
+    max-height: 58dvh;
+  }
+
+  .panel__header {
+    padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4);
+  }
+
+  .panel__clock {
+    font-size: 2rem;
+  }
+
+  .panel__body {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+
+  .daytime {
+    top: var(--space-2);
+    right: var(--space-2);
+  }
+
+  .drag-hint {
+    display: none;
+  }
+
+  .toast {
+    bottom: auto;
+    top: 4.5rem;
+  }
+
+  .add-form__input {
+    font-size: var(--text-md);
+  }
+}

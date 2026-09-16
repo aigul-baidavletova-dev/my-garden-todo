@@ -1,0 +1,158 @@
+<!doctype html>
+<!-- всё динамическое (сад, список, счётчики) - пустые контейнеры, их заполняют render.js и scene.js -->
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Список задач, в котором каждое выполненное дело вырастает в дерево в 3D-саду">
+  <title>Сад — список задач</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8C%B3%3C/text%3E%3C/svg%3E">
+
+  <!-- Lora для заголовков, JetBrains Mono для мелких подписей, обе с кириллицей -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Lora:wght@500;600;700&display=swap">
+
+  <!-- tokens первым, остальные используют его переменные -->
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/animations.css">
+
+  <!-- время суток выставляем сразу, до загрузки модулей, иначе при F5 на секунду мигают утренние цвета.
+       Логика та же, что в phaseOfHour (core/daytime.js) -->
+  <script>
+    try {
+      const choice = JSON.parse(localStorage.getItem('garden/daytime'));
+      const hour = new Date().getHours();
+      const byClock = hour >= 5 && hour < 17 ? 'morning' : hour >= 17 && hour < 22 ? 'evening' : 'night';
+      document.documentElement.dataset.daytime = ['morning', 'evening', 'night'].includes(choice) ? choice : byClock;
+    } catch {
+      document.documentElement.dataset.daytime = 'morning';
+    }
+  </script>
+
+  <!-- чтобы писать import from 'three' без сборщика -->
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.js" } }
+  </script>
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+
+  <!-- сад на весь экран; для скринридера скрыт, те же задачи есть в списке -->
+  <canvas class="garden-canvas" id="garden-canvas" aria-hidden="true"></canvas>
+  <p class="garden-fallback" id="garden-fallback" hidden>3D-сад не загрузился в этом браузере, но задачи работают</p>
+  <div class="plant-tooltip" id="plant-tooltip" aria-hidden="true" hidden></div>
+
+  <!-- время суток -->
+  <div class="daytime" id="daytime" role="group" aria-label="Время суток">
+    <button class="daytime__btn" type="button" data-choice="auto" aria-pressed="true" title="По часам">Авто</button>
+    <button class="daytime__btn" type="button" data-choice="morning" aria-pressed="false" title="Утро">
+      <span aria-hidden="true">🌅</span><span class="visually-hidden">Утро</span>
+    </button>
+    <button class="daytime__btn" type="button" data-choice="evening" aria-pressed="false" title="Вечер">
+      <span aria-hidden="true">🌇</span><span class="visually-hidden">Вечер</span>
+    </button>
+    <button class="daytime__btn" type="button" data-choice="night" aria-pressed="false" title="Ночь">
+      <span aria-hidden="true">🌙</span><span class="visually-hidden">Ночь</span>
+    </button>
+  </div>
+
+  <p class="drag-hint" aria-hidden="true">Потяни, чтобы повернуть сад · колесо — приблизить</p>
+
+  <!-- панель задач -->
+  <aside class="panel" id="panel" aria-labelledby="app-title">
+    <header class="panel__header">
+      <div class="panel__titles">
+        <h1 class="visually-hidden" id="app-title">Сад — список задач</h1>
+        <!-- обновляется раз в секунду из main.js -->
+        <time class="panel__clock" id="clock" datetime="">--:--</time>
+        <p class="panel__date" id="date"></p>
+      </div>
+      <button class="panel__toggle" id="panel-toggle" type="button" aria-expanded="true" aria-controls="panel-body">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="panel__toggle-label">Смотреть сад</span>
+      </button>
+    </header>
+
+    <div class="panel__body" id="panel-body">
+      <p class="garden-summary" id="garden-summary" aria-live="polite">Голая земля. Посади первое семечко</p>
+
+      <!-- form, а не просто кнопка: так Enter работает сам -->
+      <form class="add-form" id="add-form" autocomplete="off">
+        <label class="visually-hidden" for="task-title">Новая задача</label>
+        <input
+          class="add-form__input"
+          id="task-title"
+          name="title"
+          type="text"
+          placeholder="Что посадим?"
+          maxlength="120"
+        >
+        <button class="add-form__button" type="submit">Посадить</button>
+      </form>
+
+      <div class="filters" id="filters" role="group" aria-label="Фильтр задач">
+        <button class="filters__btn" type="button" data-filter="all" aria-pressed="true">
+          Все <span class="filters__count" data-count="all">0</span>
+        </button>
+        <button class="filters__btn" type="button" data-filter="active" aria-pressed="false">
+          Растут <span class="filters__count" data-count="active">0</span>
+        </button>
+        <button class="filters__btn" type="button" data-filter="done" aria-pressed="false">
+          Выросли <span class="filters__count" data-count="done">0</span>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <label class="visually-hidden" for="search">Поиск по задачам</label>
+        <input class="toolbar__search" id="search" type="search" placeholder="Поиск по саду" autocomplete="off">
+
+        <label class="visually-hidden" for="sort">Сортировка</label>
+        <select class="toolbar__sort" id="sort">
+          <option value="created">Сначала старые</option>
+          <option value="newest">Сначала новые</option>
+          <option value="title">По алфавиту</option>
+          <option value="activeFirst">Сначала ростки</option>
+        </select>
+      </div>
+
+      <!-- карточки генерит taskTemplate в render.js -->
+      <ul class="task-list" id="task-list" role="list" aria-label="Задачи"></ul>
+
+      <div class="empty" id="empty" hidden>
+        <p class="empty__icon" aria-hidden="true">🌱</p>
+        <p class="empty__text" id="empty-text">Грядка пуста. Что посадим?</p>
+      </div>
+
+      <footer class="panel__footer">
+        <p id="remaining" aria-live="polite">Осталось 0 задач</p>
+        <button class="button button--ghost" id="clear-done" type="button">🧺 Собрать урожай</button>
+      </footer>
+    </div>
+  </aside>
+
+  <!-- окно при запуске. method="dialog" закрывает его по кнопке без всякого JS,
+       showModal() вызывается в main.js -->
+  <dialog class="welcome" id="welcome" aria-labelledby="welcome-title">
+    <form method="dialog">
+      <p class="welcome__icon" aria-hidden="true">🌱</p>
+      <h2 class="welcome__title" id="welcome-title">Лес не вырастает за один день</h2>
+      <p class="welcome__text">
+        Он вырастает из одного дерева, потом ещё одного — и ещё.
+        Так и с делами: каждая задача, даже самая маленькая, важна.
+        Выполни её — и в твоём саду станет на одно дерево больше.
+      </p>
+      <button class="welcome__button" type="submit" autofocus>Я понял, готов работать!</button>
+    </form>
+  </dialog>
+
+  <!-- "Задача удалена · Вернуть" -->
+  <div class="toast" id="toast" role="status" hidden>
+    <span class="toast__message" id="toast-message"></span>
+    <button class="toast__action" id="toast-action" type="button">Вернуть</button>
+  </div>
+
+</body>
+</html>

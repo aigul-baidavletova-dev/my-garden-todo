@@ -1,0 +1,94 @@
+<!doctype html>
+<!-- открывать через Live Server: http://127.0.0.1:5500/tests/ (с file:// модули не грузятся) -->
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тесты Сада</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Lora:wght@500;700&display=swap">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: var(--space-6) var(--space-4);
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+    }
+
+    main {
+      max-width: 48rem;
+      margin-inline: auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      line-height: 1;
+    }
+
+    .subtitle {
+      margin: var(--space-2) 0 var(--space-5);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: var(--text-xs);
+    }
+
+    .summary {
+      margin: 0 0 var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-2);
+      font-weight: 600;
+      font-size: var(--text-md);
+    }
+
+    .summary--pass { background: var(--color-done-surface); color: var(--color-done); }
+    .summary--fail { background: var(--color-accent); color: var(--color-on-accent); }
+
+    #results {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px dashed var(--color-border);
+    }
+
+    .result {
+      display: grid;
+      grid-template-columns: 1.5rem 1fr;
+      gap: var(--space-2);
+      padding: var(--space-2) 0;
+      border-bottom: 1px dashed var(--color-border);
+    }
+
+    .result__mark { font-weight: 600; }
+    .result--pass .result__mark { color: var(--color-done); }
+    .result--fail .result__mark,
+    .result--fail .result__name { color: var(--color-danger); font-weight: 600; }
+
+    .result__error {
+      grid-column: 2;
+      margin: 0;
+      white-space: pre-wrap;
+      color: var(--color-text-muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Журнал садовника</h1>
+    <p class="subtitle">Тесты чистого ядра «Сада»</p>
+    <p class="summary" id="summary" role="status">Растим…</p>
+    <ul id="results" role="list"></ul>
+  </main>
+  <script type="module" src="./core.test.js"></script>
+</body>
+</html>
