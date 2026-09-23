@@ -2,6 +2,8 @@
 
 **Live demo:** [my-garden-todo.netlify.app](https://my-garden-todo.netlify.app/)
 
+https://github.com/user-attachments/assets/71c7ee30-cd3e-4cf8-a86c-776232453647
+
 A university lab project that applies functional programming (FP) principles to a web application built with plain HTML, CSS and JavaScript.
 
 ## Overview
